@@ -169,10 +169,16 @@ class EveAPIQuery(object):
         data = xml(data)['eveapi']
         result = bunchify(data['result'], 'result')
         data = Bunch(data)
-
+        
         if len(result) == 1:
             result = getattr(result, result.keys())[0]
         redis.set(cache_key, cPickle.dumps((arrow.get(data.cachedUntil), result), -1))
-        redis.expire(cache_key, 60 * 60 * 6)
+        
+        cached_until = datetime.datetime.strptime(
+            data.cachedUntil, "%Y-%m-%d %H:%M:%S")
+        current_time = datetime.datetime.strptime(
+            data.currentTime, "%Y-%m-%d %H:%M:%S")
+        
+        redis.expire(cache_key, (cached_until-current_time).seconds)
         return result
 
