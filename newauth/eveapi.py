@@ -173,7 +173,7 @@ class EveAPIQuery(object):
         if len(result) == 1:
             result = getattr(result, result.keys())[0]
         redis.set(cache_key, cPickle.dumps((arrow.get(data.cachedUntil), result), -1))
-        
+ 
         cached_until = datetime.datetime.strptime(
             data.cachedUntil, "%Y-%m-%d %H:%M:%S")
         current_time = datetime.datetime.strptime(
