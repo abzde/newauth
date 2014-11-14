@@ -86,10 +86,11 @@ def create_app():
 
     @app.before_request
     def check_session():
-        if session.get('ip') != request.remote_addr:
+        if not session.get('ip'):
+            session['ip'] = request.remote_addr
+        elif session.get('ip') != request.remote_addr:
             session.clear()
             session['ip'] = request.remote_addr
-            flash('Session expired, please login.')
-            return redirect(login_url('AccountView:login', next_url=request.url))
+            flash('Session expired.')
 
     return app
