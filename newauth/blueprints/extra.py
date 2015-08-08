@@ -13,7 +13,7 @@ class ExtraView(FlaskView):
     def standings(self):
         if request.method == 'POST' and current_user.is_admin():
             update_contacts.delay()
-            return redirect(url_for('AdminView:standings', updated=True))
+            return redirect(url_for('ExtraView:standings', updated=True))
         if request.args.get('updated') and current_user.is_admin():
             flash('Contacts will be updated shortly.', 'success')
         contacts = {
@@ -23,6 +23,10 @@ class ExtraView(FlaskView):
             '10': {'corporations': [], 'alliances': []},
         }
         for contact in AuthContact.query.filter(AuthContact.standing != 0).all():
+            if not hasattr(contacts, str(contact.standing)):
+                # Not in our defaults above. 
+                # TODO: seems like this should be normalizing instead of ignoring?
+                continue
             if contact.get_type() == AuthContactType.alliance:
                 contacts[str(contact.standing)]['alliances'].append(contact)
             else:
